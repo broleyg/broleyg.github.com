@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Remote Enumeration</title>
+  </head>
+  <body>
+    <p>Monitor Traffic Volume<br>
+      iptables -I INPUT 1 -s &lt;victim-ip-address&gt; -j ACCEPT<br>
+      iptables -I OUTPUT -d &lt;victim-ip-address&gt; -j ACCEPT<br>
+      <br>
+      iptables -Z ** reset counters<br>
+      iptables -vn -L ** view traffic<br>
+      <br>
+      DNS enueration tools<br>
+      host -t ns &lt;domain&gt;<br>
+      host &lt;ip address&gt;<br>
+      for ip in $(seq &lt;low host id&gt; &lt;high host id&gt;); do host
+      &lt;network-id&gt;.$ip;done | grep -v "not found"<br>
+      host -l &lt;domain&gt; &lt;nameserver&gt;<br>
+      for ns in $(host -t ns &lt;domain&gt; |cut -d" " f4); do host -l
+      &lt;domain&gt; $ns | grep "has address";done<br>
+      dnsenum<br>
+      dnsrecon<br>
+      <br>
+      Port Scans<br>
+      nc -nvv -v -w 1 -z &lt;ip address&gt; &lt;low port&gt; - &lt;highport&gt;
+      ** tcp<br>
+      nc -unvv -v -w 1 -z &lt;ip address&gt; &lt;low port&gt; - &lt;highport&gt;
+      ** udp (unreliable since ICMP packets are usually filtered at FW)<br>
+      nmap (config in /usr/share/nmap/ directory ** review them)<br>
+      unicornscan<br>
+      --max-rtt-timeout 300ms --max-retries<br>
+      masscan<br>
+      <br>
+      Network Sweeps<br>
+      nmap -sn &lt;ip address&gt; - &lt;ip address&gt; -oG ping-sweep-nmap **
+      icmp sweep<br>
+      nmap -p &lt;port&gt; - &lt;port&gt; &lt;ip address&gt; - &lt;ip
+      address&gt; -oG web-sweep-nmap ** tcp/80 sweep<br>
+      nmap -sT --top-ports &lt;#&gt; &lt;ip address&gt; - &lt;ip address&gt; -oG
+      top-ports-sweep-nmap ** top tcp ports sweep<br>
+      ** hosts with lots of services can then have full port scans<br>
+      <br>
+      SMB Enumeration<br>
+      nmap -p139,445 &lt;ip range&gt; --open<br>
+      nbtscan <br>
+      rpcclient -U "" &lt;Win2k ip address&gt; ** enter an empty password, if
+      connected its misconfigured<br>
+      srvinfo ** version<br>
+      enumdomusers ** displays users defined on the server<br>
+      getdompwinfo ** displays password policy configured on server<br>
+      enum4linux<br>
+      nmap -p 139,445 --script smb-enum-users &lt;ip address&gt;<br>
+      ls -l /usr/share/nmap/scripts/|grep smb ** shows all the nmap SMB scripts
+      that can be invoked<br>
+      nmap -p 139,445 --script=smb-check-vulns --script-args=unsafe=1 &lt;ip
+      address&gt;<br>
+      nmap -p 139,445 --script=smb-security-mode &lt;ip address(s)&gt;<br>
+      <br>
+      SMTP Enumeration<br>
+      for user in $(cat &lt;user-list.txt&gt;); do echo VRFY $user| nc -nv -w 1
+      &lt;mail-server-ip-address&gt; 25 1&gt;/dev/null| grep ^"250";done<br>
+      for user in $(cat 227-users.txt); do echo VRFY $user| nc -nv -w 1
+      10.11.1.229 25 1&gt;/dev/null| grep ^"250";done <br>
+      for user in $(cat 227-users.txt); do echo USER $user| nc -nv -w 1
+      10.11.1.229 110 1&gt;/dev/null| grep ^"250";done<br>
+      <br>
+      SNMP Enumeration (udp/161)<br>
+      nmap -sU --open -p 161 &lt;ip address&gt; - &lt;ip address&gt; --open<br>
+      onesixtyone<br>
+      for ip in $(seq &lt;low host id&gt; &lt;high host id&gt;); do echo
+      &lt;network id&gt;.$ip; done &gt; ips<br>
+      onesixtyone -c &lt;community-string-list.txt&gt; -i
+      &lt;ip-address-list.txt&gt;<br>
+      snmpwalk -c &lt;public-snmp-string&gt; -v1 &lt;ip address&gt;
+      &lt;mib-value&gt;<br>
+      ** common mib-values<br>
+      System Processes 1.3.6.1.2.1.25.1.6.0<br>
+      Running Programs 1.3.6.1.2.1.25.4.2.1.2<br>
+      Process Path 1.3.6.1.2.1.25.4.2.1.4<br>
+      Storage Units 1.3.6.1.2.1.25.2.3.1.4<br>
+      Software Name 1.3.6.1.2.1.25.6.3.1.2<br>
+      User Accounts 1.3.6.1.4.1.77.1.2.25<br>
+      TCP Local Ports 1.3.6.1.2.1.6.13.1.3<br>
+      snmpenum &lt;ip address&gt; <br>
+      snmp-check -v &lt;version&gt; -c &lt;community string&gt; &lt;ip
+      address&gt; ** default is v1 and public for community string<br>
+      <br>
+      <br>
+    </p>
+  </body>
+</html>
